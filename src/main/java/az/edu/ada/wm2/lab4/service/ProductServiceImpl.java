@@ -11,16 +11,15 @@ import java.util.UUID;
 
 @Service
 public class ProductServiceImpl implements ProductService {
-
     private final ProductRepository productRepository;
 
-    public ProductServiceImpl(ProductRepository productRepository){
-        this.productRepository=productRepository;
+    public ProductServiceImpl(ProductRepository productRepository) {
+        this.productRepository = productRepository;
     }
 
     @Override
     public Product createProduct(Product product) {
-        if(product.getId()==null){
+        if (product.getId()==null){
             product.setId(UUID.randomUUID());
         }
 
@@ -39,30 +38,40 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product updateProduct(UUID id, Product product) {
-        if (!productRepository.existsById(id)){
+        if (!productRepository.existsById(id)) {
             throw new RuntimeException("Product not found with id: " + id);
         }
-
         product.setId(id);
         return productRepository.save(product);
     }
 
     @Override
     public void deleteProduct(UUID id) {
-        if (!productRepository.existsById(id)){
+        if(!productRepository.existsById(id)){
             throw new RuntimeException("Product not found with id: " + id);
         }
-
-         productRepository.deleteById(id);
+        productRepository.deleteById(id);
     }
 
     @Override
     public List<Product> getProductsExpiringBefore(LocalDate date) {
-        return productRepository.findAll().stream().filter(product -> product.getExpirationDate().isBefore(date)).toList();
+
+        return productRepository.findAll()
+                .stream()
+                .filter(product ->
+                        product.getExpirationDate() != null &&
+                                product.getExpirationDate().isBefore(date))
+                .toList();
     }
 
     @Override
     public List<Product> getProductsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
-        return productRepository.findAll().stream().filter(product->product.getPrice().compareTo(minPrice)>=0 && product.getPrice().compareTo(maxPrice)<=0).toList();
-    }
+        return productRepository.findAll()
+                .stream()
+                .filter(product ->
+                        product.getPrice() != null &&
+                                product.getPrice().compareTo(minPrice) >= 0 &&
+                                product.getPrice().compareTo(maxPrice) <= 0)
+                .toList();    }
 }
+
