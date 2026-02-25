@@ -2,8 +2,9 @@ package az.edu.ada.wm2.lab4.controller;
 
 import az.edu.ada.wm2.lab4.model.Product;
 import az.edu.ada.wm2.lab4.service.ProductService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -22,41 +23,62 @@ public class ProductController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Product createProduct(@RequestBody Product product){
-        return productService.createProduct(product);
+    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+        Product created = productService.createProduct(product);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping
-    public List<Product> getAllProducts(){
-        return productService.getAllProducts();
+    public ResponseEntity<List<Product>> getAllProducts() {
+        List<Product> products = productService.getAllProducts();
+        return ResponseEntity.ok(products);
     }
 
     @GetMapping("/{id}")
-    public Product getProductById(@PathVariable UUID id){
-        return productService.getProductById(id);
+    public ResponseEntity<Product> getProductById(@PathVariable UUID id) {
+        try {
+            Product product = productService.getProductById(id);
+            return ResponseEntity.ok(product);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @PutMapping("/{id}")
-    public Product updateProduct(@PathVariable UUID id, @RequestBody Product product){
-        return productService.updateProduct(id, product);
+    public ResponseEntity<Product> updateProduct(@PathVariable UUID id,
+                                                 @RequestBody Product product) {
+        try {
+            Product updated = productService.updateProduct(id, product);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
-
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteProduct(@PathVariable UUID id){
-         productService.deleteProduct(id);
+    public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
+        try {
+            productService.deleteProduct(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @GetMapping("/filter/expiring")
-    public List<Product> getProductsExpiringBefore(@RequestParam LocalDate date) {
-        return productService.getProductsExpiringBefore(date);
+    public ResponseEntity<List<Product>> getProductsExpiringBefore(
+            @RequestParam("date")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        List<Product> products = productService.getProductsExpiringBefore(date);
+        return ResponseEntity.ok(products);
     }
 
     @GetMapping("/filter/price")
-    public List<Product> getProductsByPriceRange(
-            @RequestParam BigDecimal min,
-            @RequestParam BigDecimal max) {
-        return productService.getProductsByPriceRange(min, max);
+    public ResponseEntity<List<Product>> getProductsByPriceRange(
+            @RequestParam("min") BigDecimal min,
+            @RequestParam("max") BigDecimal max) {
+
+        List<Product> products = productService.getProductsByPriceRange(min, max);
+        return ResponseEntity.ok(products);
     }
 }
