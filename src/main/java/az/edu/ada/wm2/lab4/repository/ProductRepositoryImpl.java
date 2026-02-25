@@ -16,7 +16,9 @@ public class ProductRepositoryImpl implements ProductRepository {
             product.setId(UUID.randomUUID());
         }
 
-        return storage.put(product.getId(), product);
+         storage.put(product.getId(), product);
+
+        return product;
     }
 
     @Override
