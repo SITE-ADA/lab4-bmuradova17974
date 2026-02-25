@@ -3,7 +3,7 @@ package az.edu.ada.wm2.lab4.controller;
 import az.edu.ada.wm2.lab4.model.Product;
 import az.edu.ada.wm2.lab4.service.ProductService;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -23,39 +23,51 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Product createProduct(@RequestBody Product product){
+    public Product createProduct(@RequestBody Product product) {
         return productService.createProduct(product);
     }
 
     @GetMapping
-    public List<Product> getAllProducts(){
+    public List<Product> getAllProducts() {
         return productService.getAllProducts();
     }
 
     @GetMapping("/{id}")
-    public Product getProductById(@PathVariable UUID id){
+    public Product getProductById(@PathVariable UUID id) {
         return productService.getProductById(id);
     }
 
     @PutMapping("/{id}")
-    public Product updateProduct(@PathVariable UUID id, @RequestBody Product product){
+    public Product updateProduct(@PathVariable UUID id,
+                                 @RequestBody Product product) {
         return productService.updateProduct(id, product);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteProduct(@PathVariable UUID id){
-         productService.deleteProduct(id);
+    public void deleteProduct(@PathVariable UUID id) {
+        productService.deleteProduct(id);
     }
 
     @GetMapping("/filter/expiring")
-    public List<Product> getProductsExpiringBefore(@RequestParam LocalDate date) {
+    public List<Product> getProductsExpiringBefore(
+            @RequestParam LocalDate date) {
         return productService.getProductsExpiringBefore(date);
     }
 
     @GetMapping("/filter/price")
-    public List<Product> getProductsByPriceRange(@RequestParam BigDecimal minPrice, @RequestParam BigDecimal maxPrice) {
+    public List<Product> getProductsByPriceRange(
+            @RequestParam("min") BigDecimal min,
+            @RequestParam("max") BigDecimal max) {
+        return productService.getProductsByPriceRange(min, max);
+    }
 
-        return productService.getProductsByPriceRange(minPrice, maxPrice);
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Void> handleRuntimeException(RuntimeException ex) {
+        if (ex.getMessage() != null &&
+                ex.getMessage().startsWith("Product not found")) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 }
