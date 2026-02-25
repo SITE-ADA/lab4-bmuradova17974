@@ -16,69 +16,59 @@ import java.util.UUID;
 @RequestMapping("/api/products")
 public class ProductController {
 
-    private final ProductService productService;
+     private final ProductService productService;
 
-    public ProductController(ProductService productService) {
-        this.productService = productService;
-    }
+     public ProductController(ProductService productService){
+         this.productService=productService;
+     }
 
-    @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
-        Product created = productService.createProduct(product);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
-    }
+     @PostMapping
+    public ResponseEntity<Product> createProduct(@RequestBody Product product){
+         return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(product));
+     }
 
-    @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts() {
-        List<Product> products = productService.getAllProducts();
-        return ResponseEntity.ok(products);
-    }
-
+     @GetMapping
+    public ResponseEntity<List<Product>> getAllProducts(){
+         return ResponseEntity.ok(productService.getAllProducts());
+     }
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable UUID id) {
-        try {
-            Product product = productService.getProductById(id);
-            return ResponseEntity.ok(product);
-        } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    public  ResponseEntity<Product> getProductById(@PathVariable UUID id){
+        try{
+            return ResponseEntity.ok(productService.getProductById(id));
+        } catch(RuntimeException e){
+            return ResponseEntity.notFound().build();
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable UUID id,
-                                                 @RequestBody Product product) {
+    public ResponseEntity<Product> updateProduct(@PathVariable UUID id, @RequestBody Product product) {
         try {
-            Product updated = productService.updateProduct(id, product);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.ok(productService.updateProduct(id, product));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         }
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
         try {
             productService.deleteProduct(id);
             return ResponseEntity.noContent().build();
-        } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 
     @GetMapping("/filter/expiring")
-    public ResponseEntity<List<Product>> getProductsExpiringBefore(
-            @RequestParam("date")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-
-        List<Product> products = productService.getProductsExpiringBefore(date);
-        return ResponseEntity.ok(products);
+    public ResponseEntity<List<Product>> getProductsExpiringBefore(@RequestParam LocalDate date) {
+        return ResponseEntity.ok(productService.getProductsExpiringBefore(date));
     }
 
     @GetMapping("/filter/price")
     public ResponseEntity<List<Product>> getProductsByPriceRange(
-            @RequestParam("min") BigDecimal min,
-            @RequestParam("max") BigDecimal max) {
-
-        List<Product> products = productService.getProductsByPriceRange(min, max);
-        return ResponseEntity.ok(products);
+            @RequestParam BigDecimal min,
+            @RequestParam BigDecimal max) {
+        return ResponseEntity.ok(productService.getProductsByPriceRange(min, max));
     }
+
 }

@@ -7,14 +7,16 @@ import java.util.*;
 
 @Repository
 public class ProductRepositoryImpl implements ProductRepository {
-private final Map<UUID, Product> storage = new HashMap<>();
+
+     private final Map<UUID, Product> storage = new HashMap<>();
+
     @Override
     public Product save(Product product) {
-        if(product.getId()==null){
+        if (product.getId() == null) {
             product.setId(UUID.randomUUID());
         }
-        storage.put(product.getId(), product);
-        return product;
+
+        return storage.put(product.getId(), product);
     }
 
     @Override
