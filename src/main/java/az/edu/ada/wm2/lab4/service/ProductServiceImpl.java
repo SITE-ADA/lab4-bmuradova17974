@@ -74,4 +74,3 @@ public class ProductServiceImpl implements ProductService {
                                 product.getPrice().compareTo(maxPrice) <= 0)
                 .toList();    }
 }
-
